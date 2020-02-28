@@ -8,11 +8,11 @@ import tensorflow as tf
 import pickle as pkl
 from sklearn.metrics import auc, roc_curve
 import matplotlib.pylab as plt
-from tensorflow import set_random_seed
+from tensorflow.compat.v1 import set_random_seed
 
 
 def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)
+    initial = tf.random.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
 
@@ -32,9 +32,10 @@ def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 5, 1, 1],
                           strides=[1, 5, 1, 1], padding='SAME')
 
+tf.compat.v1.disable_eager_execution()
 
-x = tf.placeholder(tf.float32, [None, 92])
-y_ = tf.placeholder(tf.float32, [None, 2])
+x = tf.compat.v1.placeholder(tf.float32, [None, 92])
+y_ = tf.compat.v1.placeholder(tf.float32, [None, 2])
 
 x_image = tf.reshape(x, [-1, 23, 4, 1])
 
@@ -77,7 +78,7 @@ h_pool2_flat = tf.reshape(h_pool1, [-1, 1 * 5 * 40])
 
 h_fc1 = tf.nn.softmax(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
-keep_prob = tf.placeholder(tf.float32)
+keep_prob = tf.compat.v1.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 W_dense_1 = weight_variable([100, 23])
@@ -88,19 +89,19 @@ W_ouput = weight_variable([23, 2])
 b_ouput = bias_variable([2])
 y_conv = tf.nn.softmax(tf.matmul(y_dense_1, W_ouput) + b_ouput)
 
-cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
-train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy)
+cross_entropy = tf.math.reduce_mean(-tf.math.reduce_sum(y_ * tf.math.log(y_conv)))
+train_step = tf.compat.v1.train.AdamOptimizer(0.0001).minimize(cross_entropy)
 
 correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 min_batch = 100
 
-sess = tf.InteractiveSession()
-tf.global_variables_initializer().run()
-saver = tf.train.Saver()
+sess = tf.compat.v1.InteractiveSession()
+tf.compat.v1.global_variables_initializer().run()
+saver = tf.compat.v1.train.Saver()
 
-saver.restore(sess, "../CNN_std_model/cnn_all_train.ckpt")
+saver.restore(sess, "CNN_std_model/cnn_all_train.ckpt")
 
 # load test_data
 # test_data = test[0]

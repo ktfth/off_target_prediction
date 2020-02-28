@@ -18,7 +18,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn import metrics
 
 np.random.seed(5)
-from tensorflow import set_random_seed
+from tensorflow.compat.v1 import set_random_seed
 set_random_seed(12)
 
 
@@ -89,5 +89,3 @@ def cnn_predict(guide_seq, off_seq):
     y_pred = loaded_model.predict(input_code).flatten()
     print(y_pred)
     return y_pred
-
-
